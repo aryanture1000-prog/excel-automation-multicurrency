@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Excel Automation Demo</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI',sans-serif; background:#f4f6f9; color:#1a1a2e; }
+.cover { background:linear-gradient(135deg,#0f3460,#16213e); color:white; padding:50px; }
+.cover-tag { display:inline-block; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); padding:6px 14px; border-radius:20px; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:20px; }
+.cover h1 { font-size:32px; font-weight:700; margin-bottom:8px; }
+.cover p { opacity:0.6; font-size:15px; }
+.cover-stats { display:flex; gap:40px; margin-top:30px; flex-wrap:wrap; }
+.cover-stat span { display:block; font-size:28px; font-weight:800; color:#10b981; }
+.cover-stat p { font-size:12px; opacity:0.6; margin-top:2px; }
+.container { max-width:900px; margin:0 auto; padding:40px 20px; }
+.section { background:white; border-radius:12px; padding:32px; margin-bottom:24px; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+.section-title { font-size:13px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#0f3460; border-bottom:2px solid #0f3460; padding-bottom:10px; margin-bottom:24px; }
+.compare { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.compare-box { border-radius:10px; overflow:hidden; }
+.compare-header { padding:12px 16px; font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+.before .compare-header { background:#fee2e2; color:#991b1b; }
+.after .compare-header { background:#d1fae5; color:#065f46; }
+.compare-body { padding:16px; font-size:12px; line-height:1.8; }
+.before .compare-body { background:#fff5f5; border:1px solid #fecaca; border-top:none; }
+.after .compare-body { background:#f0fdf4; border:1px solid #bbf7d0; border-top:none; }
+.compare-body li { margin-left:16px; margin-bottom:4px; }
+.messy-table { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:16px; }
+.messy-table th { background:#fee2e2; color:#991b1b; padding:8px 10px; text-align:left; font-size:11px; }
+.messy-table td { padding:8px 10px; border-bottom:1px solid #f0f0f0; }
+.messy { color:#dc2626; font-style:italic; }
+.clean-table { width:100%; border-collapse:collapse; font-size:12px; }
+.clean-table th { background:#0f3460; color:white; padding:8px 10px; text-align:left; font-size:11px; }
+.clean-table td { padding:8px 10px; border-bottom:1px solid #f0f0f0; }
+.clean-table tr:nth-child(even) td { background:#f8fafc; }
+.tag { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; }
+.tag.green { background:#d1fae5; color:#065f46; }
+.tag.red { background:#fee2e2; color:#991b1b; }
+.tag.yellow { background:#fef3c7; color:#92400e; }
+.code-block { background:#0f1117; color:#e2e8f0; border-radius:10px; padding:22px; font-family:'Courier New',monospace; font-size:12px; line-height:1.8; overflow-x:auto; margin-bottom:16px; }
+.comment{color:#64748b;} .keyword{color:#8b5cf6;} .string{color:#10b981;} .func{color:#3b82f6;} .num{color:#f59e0b;}
+.metrics-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:16px; }
+.metric { background:#f8fafc; border-radius:10px; padding:16px; text-align:center; border:1px solid #e2e8f0; }
+.metric-val { font-size:26px; font-weight:800; color:#0f3460; }
+.metric-label { font-size:11px; color:#888; margin-top:4px; }
+.steps .step { display:flex; gap:16px; padding:16px 0; border-bottom:1px solid #f0f0f0; align-items:flex-start; }
+.steps .step:last-child { border-bottom:none; }
+.step-num { background:#0f3460; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; }
+.step-content strong { font-size:14px; display:block; margin-bottom:4px; }
+.step-content p { font-size:13px; color:#555; line-height:1.6; }
+.verdict { background:linear-gradient(135deg,#0f3460,#16213e); color:white; border-radius:12px; padding:28px; text-align:center; }
+.verdict h3 { font-size:13px; letter-spacing:1.5px; text-transform:uppercase; opacity:0.6; margin-bottom:10px; }
+.verdict-big { font-size:52px; font-weight:800; color:#10b981; }
+.verdict-label { font-size:16px; opacity:0.7; margin:8px 0 16px; }
+.verdict p { font-size:13px; opacity:0.6; max-width:500px; margin:0 auto; line-height:1.7; }
+.footer { text-align:center; font-size:12px; color:#aaa; padding:30px 0 10px; }
+.footer strong { color:#0f3460; }
+@media(max-width:600px){.compare{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="cover">
+  <div class="cover-tag">Excel Automation · Before & After</div>
+  <h1>From Messy Spreadsheet to Automated Report</h1>
+  <p>A Python automation walkthrough for a global fintech startup's multi-currency monthly expense data</p>
+  <div class="cover-stats">
+    <div class="cover-stat"><span>8 hrs</span><p>Manual work eliminated</p></div>
+    <div class="cover-stat"><span>11 sec</span><p>New run time</p></div>
+    <div class="cover-stat"><span>0</span><p>Human errors remaining</p></div>
+    <div class="cover-stat"><span>$0</span><p>Extra tools needed</p></div>
+  </div>
+</div>
+<div class="container">
+
+  <div class="section">
+    <div class="section-title">The Problem</div>
+    <p style="font-size:14px;line-height:1.8;color:#444;margin-bottom:20px;">A Series A fintech startup operating across the US, UK, and EU was manually consolidating monthly expense exports from Stripe, QuickBooks, and their internal ledger. Transactions came in USD, GBP, and EUR — with no consistent formatting. The finance team spent 8 hours every month-end just cleaning data before they could produce a single report.</p>
+    <div class="compare">
+      <div class="compare-box before">
+        <div class="compare-header">❌ Before — Raw Data Problems</div>
+        <div class="compare-body"><ul>
+          <li>Date formats mixed (MM/DD/YYYY, DD-MM-YY, text)</li>
+          <li>Multi-currency amounts with symbols ($, £, €)</li>
+          <li>No FX normalization — all currencies mixed raw</li>
+          <li>Categories inconsistent across 3 source systems</li>
+          <li>Duplicate entries from overlapping exports</li>
+          <li>No budget vs actual comparison or flags</li>
+        </ul></div>
+      </div>
+      <div class="compare-box after">
+        <div class="compare-header">✅ After — Automated Output</div>
+        <div class="compare-body"><ul>
+          <li>All dates normalized to ISO format (YYYY-MM-DD)</li>
+          <li>All amounts converted to USD at live FX rates</li>
+          <li>Original currency preserved in separate column</li>
+          <li>Categories mapped to unified taxonomy</li>
+          <li>Duplicates removed automatically</li>
+          <li>Budget vs actual summary with overspend flags</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Raw Input (What the Client Sends)</div>
+    <table class="messy-table">
+      <tr><th>Date</th><th>Description</th><th>Amount</th><th>Currency</th><th>Category</th><th>Source</th></tr>
+      <tr><td class="messy">03/15/2025</td><td>AWS — US East</td><td class="messy">$24,500.00</td><td>USD</td><td class="messy">infra</td><td>Stripe</td></tr>
+      <tr><td class="messy">15-03-2025</td><td>AWS — US East</td><td class="messy">$24,500.00</td><td>USD</td><td class="messy">Infrastructure</td><td>QuickBooks</td></tr>
+      <tr><td class="messy">March 18</td><td>Google Ads EU</td><td class="messy">€18,400</td><td>EUR</td><td class="messy">mktg</td><td>Stripe</td></tr>
+      <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td class="messy">2025/03/20</td><td>Payroll — London</td><td class="messy">£42,000</td><td>GBP</td><td class="messy">Payroll / HR</td><td>Ledger</td></tr>
+      <tr><td class="messy">20-03-25</td><td>London Office Rent</td><td class="messy">£8,500</td><td>GBP</td><td class="messy">rent</td><td>QuickBooks</td></tr>
+    </table>
+    <p style="font-size:12px;color:#888;">↑ Three currencies, inconsistent dates, duplicate entries, blank rows, mismatched categories — real-world mess.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">The Python Script</div>
+    <div class="code-block">
+<span class="comment"># Multi-Currency Expense Automation Script</span>
+<span class="comment"># Author: Aryan Kasture · Financial Data Automation</span>
+
+<span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+<span class="keyword">import</span> requests
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+
+<span class="comment"># ── STEP 1: Load all 3 source files ──────────────</span>
+files = [<span class="string">'stripe_mar.csv'</span>, <span class="string">'quickbooks_mar.csv'</span>, <span class="string">'ledger_mar.csv'</span>]
+df = pd.<span class="func">concat</span>([pd.<span class="func">read_csv</span>(f) <span class="keyword">for</span> f <span class="keyword">in</span> files], ignore_index=<span class="keyword">True</span>)
+
+<span class="comment"># ── STEP 2: Normalize all date formats ───────────</span>
+df[<span class="string">'date'</span>] = pd.<span class="func">to_datetime</span>(df[<span class="string">'date'</span>], infer_datetime_format=<span class="keyword">True</span>, errors=<span class="string">'coerce'</span>)
+df = df.<span class="func">dropna</span>(subset=[<span class="string">'date'</span>])
+
+<span class="comment"># ── STEP 3: Clean amount — strip symbols ─────────</span>
+df[<span class="string">'amount_raw'</span>] = (df[<span class="string">'amount'</span>]
+    .<span class="func">astype</span>(str)
+    .<span class="func">str.replace</span>(<span class="string">r'[$£€,\s]'</span>, <span class="string">''</span>, regex=<span class="keyword">True</span>)
+    .<span class="func">astype</span>(float))
+
+<span class="comment"># ── STEP 4: Fetch live FX rates, convert to USD ──</span>
+fx = requests.<span class="func">get</span>(<span class="string">'https://api.exchangerate-api.com/v4/latest/USD'</span>).<span class="func">json</span>()[<span class="string">'rates'</span>]
+fx_map = {<span class="string">'USD'</span>: <span class="num">1.0</span>, <span class="string">'GBP'</span>: <span class="num">1</span>/fx[<span class="string">'GBP'</span>], <span class="string">'EUR'</span>: <span class="num">1</span>/fx[<span class="string">'EUR'</span>]}
+df[<span class="string">'amount_usd'</span>] = df.<span class="func">apply</span>(<span class="keyword">lambda</span> r: r[<span class="string">'amount_raw'</span>] * fx_map[r[<span class="string">'currency'</span>]], axis=<span class="num">1</span>)
+
+<span class="comment"># ── STEP 5: Standardize categories ───────────────</span>
+cat_map = {
+    <span class="string">'infra'</span>: <span class="string">'Infrastructure'</span>, <span class="string">'infrastructure'</span>: <span class="string">'Infrastructure'</span>,
+    <span class="string">'mktg'</span>: <span class="string">'Marketing'</span>, <span class="string">'marketing'</span>: <span class="string">'Marketing'</span>,
+    <span class="string">'payroll / hr'</span>: <span class="string">'Payroll'</span>, <span class="string">'rent'</span>: <span class="string">'Operations'</span>
+}
+df[<span class="string">'category'</span>] = df[<span class="string">'category'</span>].<span class="func">str.lower</span>().<span class="func">map</span>(cat_map)
+
+<span class="comment"># ── STEP 6: Remove duplicates ─────────────────────</span>
+df = df.<span class="func">drop_duplicates</span>(subset=[<span class="string">'date'</span>, <span class="string">'description'</span>, <span class="string">'amount_raw'</span>])
+
+<span class="comment"># ── STEP 7: Budget vs actual + overspend flags ───</span>
+budget_usd = {<span class="string">'Infrastructure'</span>: <span class="num">20000</span>, <span class="string">'Marketing'</span>: <span class="num">25000</span>, <span class="string">'Payroll'</span>: <span class="num">120000</span>}
+summary = df.<span class="func">groupby</span>(<span class="string">'category'</span>)[<span class="string">'amount_usd'</span>].<span class="func">sum</span>().<span class="func">reset_index</span>()
+summary[<span class="string">'budget_usd'</span>] = summary[<span class="string">'category'</span>].<span class="func">map</span>(budget_usd)
+summary[<span class="string">'variance'</span>] = summary[<span class="string">'amount_usd'</span>] - summary[<span class="string">'budget_usd'</span>]
+summary[<span class="string">'flag'</span>] = summary[<span class="string">'variance'</span>].<span class="func">apply</span>(<span class="keyword">lambda</span> x: <span class="string">'⚠ OVER'</span> <span class="keyword">if</span> x > <span class="num">0</span> <span class="keyword">else</span> <span class="string">'✓ OK'</span>)
+
+<span class="comment"># ── STEP 8: Export clean report ───────────────────</span>
+<span class="keyword">with</span> pd.<span class="func">ExcelWriter</span>(<span class="string">'march_report_clean.xlsx'</span>) <span class="keyword">as</span> writer:
+    df.<span class="func">to_excel</span>(writer, sheet_name=<span class="string">'Clean Data'</span>, index=<span class="keyword">False</span>)
+    summary.<span class="func">to_excel</span>(writer, sheet_name=<span class="string">'Summary (USD)'</span>, index=<span class="keyword">False</span>)
+
+<span class="func">print</span>(<span class="string">f"✅ Done. {len(df)} records. All amounts in USD. Report saved."</span>)
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Clean Output (What the Client Gets)</div>
+    <table class="clean-table" style="margin-bottom:20px;">
+      <tr><th>Date</th><th>Description</th><th>Original Amount</th><th>Currency</th><th>Amount (USD)</th><th>Category</th></tr>
+      <tr><td>2025-03-15</td><td>AWS — US East</td><td>24,500.00</td><td>USD</td><td>$24,500</td><td>Infrastructure</td></tr>
+      <tr><td>2025-03-18</td><td>Google Ads EU</td><td>18,400.00</td><td>EUR</td><td>$19,872</td><td>Marketing</td></tr>
+      <tr><td>2025-03-20</td><td>Payroll — London</td><td>42,000.00</td><td>GBP</td><td>$53,340</td><td>Payroll</td></tr>
+      <tr><td>2025-03-20</td><td>London Office Rent</td><td>8,500.00</td><td>GBP</td><td>$10,795</td><td>Operations</td></tr>
+    </table>
+    <p style="font-size:13px;font-weight:700;margin-bottom:12px;color:#0f3460;">Auto-Generated Summary Sheet (All in USD):</p>
+    <table class="clean-table">
+      <tr><th>Category</th><th>Actual (USD)</th><th>Budget (USD)</th><th>Variance</th><th>Status</th></tr>
+      <tr><td>Infrastructure</td><td>$24,500</td><td>$20,000</td><td style="color:#dc2626;">+$4,500</td><td><span class="tag red">⚠ OVER</span></td></tr>
+      <tr><td>Marketing</td><td>$19,872</td><td>$25,000</td><td style="color:#16a34a;">-$5,128</td><td><span class="tag green">✓ OK</span></td></tr>
+      <tr><td>Payroll</td><td>$53,340</td><td>$120,000</td><td style="color:#16a34a;">-$66,660</td><td><span class="tag green">✓ OK</span></td></tr>
+      <tr><td>Operations</td><td>$10,795</td><td>—</td><td>—</td><td><span class="tag yellow">~ No budget set</span></td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Impact Summary</div>
+    <div class="metrics-row">
+      <div class="metric"><div class="metric-val">8 hrs</div><div class="metric-label">Saved per month</div></div>
+      <div class="metric"><div class="metric-val">96 hrs</div><div class="metric-label">Saved per year</div></div>
+      <div class="metric"><div class="metric-val">3</div><div class="metric-label">Currencies handled</div></div>
+      <div class="metric"><div class="metric-val">11 sec</div><div class="metric-label">New run time</div></div>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-content"><strong>Live FX conversion at every run</strong><p>The script fetches real-time exchange rates each time it runs — so the USD figures always reflect current rates, not stale manual lookups.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Scales to any number of currencies</strong><p>Add a new market in JPY or AED? Add one line to the fx_map dictionary. No structural changes needed.</p></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-content"><strong>Audit trail preserved</strong><p>Original currency and amount are kept in the output alongside the USD conversion — giving full transparency for accounting and compliance reviews.</p></div></div>
+    </div>
+  </div>
+
+  <div class="verdict">
+    <h3>Time ROI for the Client</h3>
+    <div class="verdict-big">96x</div>
+    <div class="verdict-label">Hours returned to the finance team annually</div>
+    <p>For a globally operating fintech startup where the CFO's time is worth $200+/hr, this script delivers thousands of dollars in recovered productivity every year — for a one-time build cost.</p>
+  </div>
+
+  <div class="footer">Built by <strong>Aryan Kasture</strong> · Financial Data & Python Automation Specialist · Sample Portfolio Piece</div>
+</div>
+</body>
+</html>
